@@ -42,11 +42,16 @@ public final class App {
             var content = ctx.formParam("content");
             try {
 
+
+                title = ctx.formParamAsClass("title", String.class).check(value -> ArticleRepository.existsByTitle(value) == false, "Статья с таким названием уже существует")
+                        .get();
                 title = ctx.formParamAsClass("title", String.class)
                         .check(value -> value.length() > 2, "Название не должно быть короче двух символов").get();
                 content = ctx.formParamAsClass("content", String.class)
-                        .check(value -> value.length() > 10, "Статья должна быть не короче 10 символов").get();
+                        .check(value -> value.length() > 10, "Статья должна быть не короче 10 символов")
+                        .get();
                 var article = new Article(title, content);
+
                 ArticleRepository.save(article);
                 ctx.redirect("/articles");
             } catch (ValidationException e) {
