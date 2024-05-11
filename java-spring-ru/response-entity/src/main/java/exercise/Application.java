@@ -30,9 +30,10 @@ public class Application {
 
     // BEGIN
     @GetMapping("/posts")
-    public ResponseEntity<List<Post>> getPosts() {
-        return ResponseEntity.ok().header("X-Total-Count", String.valueOf(this.posts.size()))
-                .body(this.posts);
+    public ResponseEntity<List<Post>> getPosts(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "5") Integer limit) {
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(this.posts.size()))
+                .body(posts.stream().skip((page - 1) * limit).limit(limit).toList());
     }
 
     @GetMapping("/posts/{id}")
@@ -52,7 +53,7 @@ public class Application {
     // END
 
     @PutMapping("/posts/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable String id, @RequestBody Post data) {
+    public ResponseEntity<Post> updatePost(@PathVariable("id") String id, @RequestBody Post data) {
         var currentPost = this.posts.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
@@ -61,7 +62,7 @@ public class Application {
             currentPost.get().setTitle(data.getTitle());
             return ResponseEntity.ok().body(currentPost.get());
         }
-        return ResponseEntity.status(204).body(currentPost.get());
+        return ResponseEntity.status(204).body(null);
     }
 
     @DeleteMapping("/posts/{id}")
